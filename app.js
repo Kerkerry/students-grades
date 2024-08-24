@@ -2,12 +2,21 @@ import express, { json } from 'express'
 import mongoose from 'mongoose'
 import User from './models/user.js'
 import Scores from './models/scores.js';
+import { ApolloServer } from 'apollo-server';
+// import typedefs from './graphql/typedefs.js';
+// import resolvers from './graphql/resolvers.js';
 const app=express()
+
 
 mongoose.connect("mongodb://localhost:27017").then((response)=>{
     app.listen(3000)
 }).catch(err=>console.log(err)
 )
+
+// const server=ApolloServer({
+//     typedefs,
+//     resolvers
+// });
 
 app.get("/get-users", (req,res)=>{
     User.find().then((result)=>{
@@ -46,6 +55,25 @@ app.post("/create-student/:student",(req,res)=>{
     })
     user.save().then((result)=>{
         res.send(result)
+    })
+})
+
+app.put("/update-student/:student",(req,res)=>{
+    const std=JSON.parse(req.params.student);
+    console.log(std);
+    User.findByIdAndUpdate(
+        {"_id":std.id},
+        {
+            "firstname":std.firstname,
+            "secondname":std.secondname,
+            "useremail":std.email,
+            "password":std.password
+        },
+        {
+            returnOriginal:false
+        }
+    ).then((result)=>{
+        res.send(result);
     })
 })
 
@@ -106,4 +134,29 @@ app.post("/add-scores/:score",(req,res)=>{
     .catch(err=>console.log(err)
     );
 })
+
+app.post("/update-scores/:score",(req,res)=>{
+    const scorefromapi=JSON.parse(req.params.score);
+    const score=Scores.findByIdAndUpdate(
+        {
+            "_id":scorefromapi.id
+        },
+        {
+            studentid:scorefromapi.studentid,
+            english:scorefromapi.english,
+            kiswahili:scorefromapi.kiswahili,
+            math:scorefromapi.math,
+            science:scorefromapi.science,
+            sstandcre:scorefromapi.sstandcre
+        },
+        {
+            returnOriginal:false
+        }
+    )
+    .then(
+        (result)=>res.send(result))
+    .catch(err=>console.log(err)
+    );
+})
+
 
