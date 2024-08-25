@@ -136,7 +136,10 @@ const RootMutation=new GraphQLObjectType({
             args:{
                 id:{type:new GraphQLNonNull(GraphQLInt)}
             },
-            resolve:(parent,args)=>websites.filter(website=>website.id!==args.id)
+            resolve:(parent,args)=>{
+                websites.filter(website=>website.id!==args.id)
+                return websites[args.id]
+            }
         },
         updateWebsite:{
             type:WebsiteType,
@@ -156,7 +159,7 @@ const RootMutation=new GraphQLObjectType({
             type:OwnerType,
             description:"Add a single owner",
             args:{
-                name:{type:GraphQLNonNull(GraphQLString)}
+                name:{type:new GraphQLNonNull(GraphQLString)}
             },
             resolve:(parent,args)=>{
                 const owner={
@@ -166,12 +169,36 @@ const RootMutation=new GraphQLObjectType({
                 owners.push(owner);
                 return owner;
             }
+        },
+        updateOwner:{
+            type:OwnerType,
+            description:"Update owner",
+            args:{
+                id:{type:new GraphQLNonNull(GraphQLInt)},
+                name:{type:new GraphQLNonNull(GraphQLString)}
+            },
+            resolve:(parent,args)=>{
+                owners[args.id-1].name=args.name
+                return owners[args.id-1];
+            }
+        },
+        removeOwner:{
+            type:OwnerType,
+            description:"Deleting owner",
+            args:{
+                id:{type:new GraphQLNonNull(GraphQLInt)}
+            },
+            resolve:(parent,args)=>{
+                owners.filter(owner=>owner.id!==args.id)
+                owners[args.id]
+            }
         }
     })
 })
 
 const schema=new GraphQLSchema({
-    query:RootQueryType
+    query:RootQueryType,
+    mutation:RootMutation
 })
 
 app.use("/graphql",graphqlHTTP({
