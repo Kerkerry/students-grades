@@ -1,7 +1,7 @@
 import express from 'express';
 import User from './models/user.js';
 import { graphqlHTTP } from 'express-graphql';
-import { GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 const app=express();
 const PORT=3000
 const owners=[
@@ -65,9 +65,9 @@ const WebsiteType=new GraphQLObjectType({
     name:"website",
     description:"This represents a websites made by the owner who is a programmer",
     fields:()=>({
-        id:{type:GraphQLNonNull(GraphQLInt)},
-        name:{type:GraphQLNonNull(GraphQLString)},
-        ownerId:{type:GraphQLNonNull(GraphQLInt)}
+        id:{type:new GraphQLNonNull(GraphQLInt)},
+        name:{type:new GraphQLNonNull(GraphQLString)},
+        ownerId:{type:new GraphQLNonNull(GraphQLInt)}
     })
 });
 
@@ -75,8 +75,8 @@ const OwnerType=new GraphQLObjectType({
     name:"owner",
     description:"This represents the owner ",
     fields:()=>({
-        id:{type:GraphQLNonNull(GraphQLInt)},
-        name:{type:GraphQLNonNull(GraphQLString)},
+        id:{type:new GraphQLNonNull(GraphQLInt)},
+        name:{type:new GraphQLNonNull(GraphQLString)},
     })
 });
 
@@ -93,11 +93,29 @@ const RootQueryType=new GraphQLObjectType({
             type:new GraphQLList(OwnerType),
             description:"List of owners",
             resolve:()=>owners
+        },
+        website:{
+            type:WebsiteType,
+            description:"Returns Single website",
+            args:{
+                id:{type:GraphQLInt}
+            },
+            resolve:(parent,arg)=>websites.find(website=>website.id==arg.id)
+        },
+        owner:{
+            type:OwnerType,
+            description:"Returns a single owner",
+            args:{
+                id:{type:GraphQLInt}
+            },
+            resolve:(parent,arg)=>owners.find(owner=>owner.id==arg.id)
         }
     })
 });
 
-
+const schema=new GraphQLSchema({
+    query:RootQueryType
+})
 
 app.use("/graphql",graphqlHTTP({
     graphiql:true,
