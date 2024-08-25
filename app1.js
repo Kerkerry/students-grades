@@ -113,6 +113,63 @@ const RootQueryType=new GraphQLObjectType({
     })
 });
 
+const RootMutation=new GraphQLObjectType({
+    name:"Mutation",
+    description:"Root Mutation",
+    fields:()=>({
+        addWebsite:{
+            type:WebsiteType,
+            description:"Add a website",
+            args:{
+                name:{type:new GraphQLNonNull(GraphQLString)},
+                ownerId:{type:new GraphQLNonNull(GraphQLInt)}
+            },
+            resolve:(parent,args)=>{
+                const website={id:websites.length+1,name:args.name,ownerId:args.ownerId};
+                websites.push(website);
+                return website;
+            }
+        },
+        removeWebsite:{
+            type:WebsiteType,
+            description:"Delete a single website",
+            args:{
+                id:{type:new GraphQLNonNull(GraphQLInt)}
+            },
+            resolve:(parent,args)=>websites.filter(website=>website.id!==args.id)
+        },
+        updateWebsite:{
+            type:WebsiteType,
+            description:"Update a website",
+            args:{
+                id:{type:new GraphQLNonNull(GraphQLInt)},
+                name:{type:new GraphQLNonNull(GraphQLString)},
+                ownerId:{type:new GraphQLNonNull(GraphQLInt)}
+            },
+            resolve:(parent,args)=>{
+                websites[args.id-1].name=args.name;
+                websites[args.id-1].ownerId=args.ownerId;
+                return websites[args.id-1];
+            }
+        },
+        addOwner:{
+            type:OwnerType,
+            description:"Add a single owner",
+            args:{
+                name:{type:GraphQLNonNull(GraphQLString)}
+            },
+            resolve:(parent,args)=>{
+                const owner={
+                    id:owners.length+1,
+                    name:args.name
+                };
+                owners.push(owner);
+                return owner;
+            }
+        }
+    })
+})
+
 const schema=new GraphQLSchema({
     query:RootQueryType
 })
