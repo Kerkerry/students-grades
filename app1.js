@@ -190,7 +190,7 @@ const RootMutation=new GraphQLObjectType({
             },
             resolve:(parent,args)=>{
                 owners.filter(owner=>owner.id!==args.id)
-                owners[args.id]
+                return owners[args.id]
             }
         }
     })
